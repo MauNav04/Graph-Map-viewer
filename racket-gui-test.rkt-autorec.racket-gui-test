@@ -1,0 +1,116 @@
+#lang racket/gui
+
+(require racket/class)
+
+(define window
+  (new frame%
+       [label "Graph Map Viewer"]
+       [width 800]
+       [height 600]))
+
+(define content-panel
+  (new horizontal-panel%
+       [parent window]
+       [min-width 200]))
+
+(define node-panel
+  (new vertical-panel%
+       [parent content-panel]))
+
+(define graphics-section
+  (new panel%
+       [parent content-panel]))
+;====== SWITCH Between Windows ======
+;(define current-panel #f) 
+;
+;(define (show-panel panel)
+;  (define old-panel current-panel)
+;
+;  (set! current-panel panel)
+;
+;  (when old-panel
+;    (send window(change-children (list old-panel) (list panel)))))
+
+;====== Set connections & weights ======
+
+
+
+;====== Capture Nodes (Cities) ======
+
+(define cities-list '()) ;Global list to store the cities provided by the user
+
+(define (create-city-field)
+  (define city-field(new text-field%[parent node-panel] [label #f]))
+  (set! cities-list (cons city-field cities-list))
+  city-field)
+
+(define (get-cities-list)
+  (for-each
+   (lambda (city-field)
+     (displayln (format "Field: ~a, Value: ~a" (send city-field get-label) (send city-field get-value))))
+  cities-list))
+
+(define node-label
+  (new message%
+       [parent node-panel]
+       [label "List of cities: "]))
+
+(define input-box
+  (new text-field%
+       [parent node-panel]
+       [label #f]))
+
+;(define (addCityField)
+;  (define newCityField
+;    (new text-field%
+;      [parent node-panel]
+;      [label #f])))
+
+(define addCityBtn
+  (new button%
+       [label "Add City"]
+       [parent window]
+       [callback
+        (lambda (button event) (create-city-field))]))
+
+;Captures the data provided by the user
+(define (capture-data nodeName)
+ (displayln nodeName))
+
+(define create-btn
+  (new button%
+       [label "Create graph"]
+       [parent window]
+       [callback
+        ;(lambda (button event) (capture-data (send input-box get-value)))]))
+        (lambda (button event) (get-cities-list))]))
+
+
+
+;====== TESTING CANVAS ======
+; Make a static text message in the frame
+(define msg
+  (new message%
+       [parent window]
+       [label "No events so far..."]))
+
+(define my-canvas%
+  (class canvas% ; The base class is canvas%
+    ; Define overriding method to handle mouse events
+    (define/override (on-event event)
+      (send msg set-label "Canvas mouse"))
+    ; Define overriding method to handle keyboard events
+    (define/override (on-char event)
+      (send msg set-label "Canvas keyboard"))
+    ; Call the superclass init, passing on all init args
+    (super-new)))
+ 
+; Make a canvas that handles events in the frame
+(new my-canvas% [parent window]
+     [paint-callback
+              (lambda (canvas dc)
+                (send dc set-scale 3 3)
+                (send dc set-text-foreground "blue")
+                (send dc draw-text "Test text!" 0 0))])
+
+(send window show #t)
